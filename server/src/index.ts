@@ -16,6 +16,9 @@ app.get("/", (_req: Request, res: Response) => {
 
 app.use("/api/sprites", spritesRouter);
 
+// Required for Vercel — export app as the serverless handler
+export default app;
+
 // Local development only
 if (process.env.NODE_ENV !== "production") {
     app.listen(PORT, () => {
