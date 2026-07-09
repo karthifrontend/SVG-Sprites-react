@@ -15,18 +15,31 @@ const allowedOrigins = process.env.CLIENT_URL
 app.use(cors({
     origin: (origin, callback) => {
         // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
+        if (!origin) {
+            console.log("[CORS] No origin header (allowed)");
+            return callback(null, true);
+        }
         
+        console.log(`[CORS] Request from origin: ${origin}`);
         if (allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
+            console.log(`[CORS] ✓ Origin allowed`);
             callback(null, true);
         } else {
-            console.log(`CORS blocked: ${origin}`);
+            console.log(`[CORS] ✗ Origin blocked: ${origin}`);
+            console.log(`[CORS] Allowed origins: ${JSON.stringify(allowedOrigins)}`);
             callback(new Error("Not allowed by CORS"));
         }
     },
     credentials: true,
 }));
 app.use(express.json({ limit: "5mb" }));
+
+// Log all incoming requests
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+    console.log(`  Headers:`, { origin: req.headers.origin, host: req.headers.host });
+    next();
+});
 
 app.get("/", (_req: Request, res: Response) => {
     res.send("Backend Running");
